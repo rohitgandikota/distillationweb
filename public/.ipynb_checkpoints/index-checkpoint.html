@@ -132,7 +132,7 @@ Think of it as taking a time machine to the middle of the creation process and a
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/dt.png" style="width:100%; max-width:800px"></center>
+  <center><img src="images/paper/dt_equation.png" style="width:100%; max-width:400px"></center>
   <figcaption>Figure 3: DT-Visualization lets us see what the model predicts as the final output at each intermediate step. This helps us understand how different models build their images over time and reveals key differences between fast and slow models.</figcaption>
 </figure>
 
@@ -145,7 +145,7 @@ This insight helps explain why diffusion models sometimes "forget" to include el
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
+  <center><img src="images/paper/debug.png" style="width:100%; max-width:800px"></center>
   <figcaption>Figure 4: DT-Visualization reveals how models can change course during generation. Here, when prompted to create "an image of dog and cat sitting on sofa," the model initially included a cat face (visible at timestep T=10) but removed it from the final output.</figcaption>
 </figure>
 
@@ -158,13 +158,8 @@ Distilled models appear to commit to a final image structure almost immediately 
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
+  <center><img src="images/paper/dt_viz.png" style="width:100%; max-width:800px"></center>
   <figcaption>Figure 5: Standard visualizations (left) show minimal differences between model types, but our DT-Visualization technique (right) reveals that distilled models commit to final image structure almost immediately, while base models gradually refine structure across multiple steps.</figcaption>
-</figure>
-
-<figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 6: This graph shows how quickly models decide on their final image structure. Distilled models establish structural composition within the initial step, while base models require approximately 30% of their total steps to reach similar structural definition.</figcaption>
 </figure>
 
 <h2>Our Solution: Diversity Distillation</h2>
@@ -176,8 +171,8 @@ By letting the slow model handle the crucial creative exploration phase and the 
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 7: Visual comparison of generation diversity. Each row shows different outputs from the same prompt using different random seeds. The base model (left) produces diverse results but is slow. The distilled model (middle) is fast but produces similar images. Our hybrid approach (right) maintains diversity while keeping the speed advantage.</figcaption>
+  <center><img src="images/paper/diverse.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 6: Visual comparison of generation diversity. Each row shows different outputs from the same prompt using different random seeds. The base model (left) produces diverse results but is slow. The distilled model (middle) is fast but produces similar images. Our hybrid approach (right) maintains diversity while keeping the speed advantage.</figcaption>
 </figure>
 
 <h2>Remarkable Results</h2>
@@ -189,13 +184,13 @@ We confirmed these results using both objective metrics like FID scores (which m
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 8: Our method achieves better FID scores (lower is better) than both the base and distilled models while maintaining similar speed to distilled models. This means our approach creates both higher quality and more diverse images without sacrificing efficiency.</figcaption>
+  <center><img src="images/paper/table.png" style="width:100%; max-width:500px"></center>
+  <figcaption>Figure 7: Our method achieves better FID scores (lower is better) than both the base and distilled models while maintaining similar speed to distilled models. This means our approach creates both higher quality and more diverse images without sacrificing efficiency.</figcaption>
 </figure>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 9: We examined various parameters to optimize our method, including guidance scale, number of timesteps, and computational trade-offs. Even using the base model for just the first step provides substantial diversity benefits.</figcaption>
+  <center><img src="images/paper/hyperparam.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 8: We examined various parameters to optimize our method, including guidance scale, number of timesteps, and computational trade-offs. Even using the base model for just the first step provides substantial diversity benefits.</figcaption>
 </figure>
 
 <h2>Practical Implications</h2>
@@ -206,7 +201,7 @@ This research challenges the traditional assumption that there must be a trade-o
 For practitioners, our findings mean that existing investments in control mechanisms like Concept Sliders, LoRAs, and custom fine-tunings can be seamlessly transferred between model types. This "control distillation" enables precise creative direction even in the fastest models.
 </p>
 <p>
-Our DT-Visualization technique also provides a valuable new tool for researchers and developers to debug and understand diffusion models, potentially leading to further innovations in model architecture and training.
+Our DT-Visualization technique provides a valuable new tool for researchers and developers to debug and understand diffusion models, potentially leading to further innovations in model architecture and training.
 </p>
 
 <h2>How to cite</h2>
