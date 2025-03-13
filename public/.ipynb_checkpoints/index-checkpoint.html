@@ -80,17 +80,12 @@ gtag('js', new Date()); gtag('config', 'G-FD12LWN557');
 <div class="card-block">
 <h3>Understanding the Diversity-Efficiency Tradeoff in Diffusion Models</h3>
 <p>
-Modern text-to-image diffusion models create impressive images but require many computational steps to generate them—sometimes up to 50-100 steps per image. Researchers have developed "distilled" models that work much faster by reducing these steps to just 1-4, making generation nearly instantaneous.
+Diffusion models face a fundamental challenge: faster generation through distillation leads to "mode collapse" - producing nearly identical images despite different random seeds. These accelerated models sacrifice creative diversity for speed, limiting their practical usefulness.
 </p>
 <p>
-However, these faster models come with a significant drawback: they tend to create similar-looking images even when using different random seeds. This phenomenon, known as "mode collapse," means distilled models sacrifice creative variety for speed.
+Our research explores what happens during those crucial early generation steps that so dramatically affects diversity. We've discovered surprising insights about when and how variety emerges during the diffusion process, challenging the assumed tradeoff between computational efficiency and creative expression.
 </p>
-<p>
-In this research, we explore why this diversity loss happens and introduce two key innovations to solve this problem: DT-Visualization helps us understand what's happening inside diffusion models at each step, and Diversity Distillation combines the best qualities of both slow and fast models to restore creative variety without sacrificing speed.
-</p>
-<p>
-Our approach not only recovers the lost diversity but actually exceeds the variety of the original slow models while maintaining the efficiency of the fast ones. We also demonstrate that control mechanisms trained on one model type can be seamlessly transferred to another, enabling precise creative control across model variations.
-</p>
+
 </div><!--card-block-->
 </div><!--card-->
 
