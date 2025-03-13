@@ -78,19 +78,18 @@ gtag('js', new Date()); gtag('config', 'G-FD12LWN557');
 
 <div class="card" style="max-width: 1020px;">
 <div class="card-block">
-<h3>How can we restore diversity in distilled diffusion models?</h3>
+<h3>Understanding the Diversity-Efficiency Tradeoff in Diffusion Models</h3>
 <p>
-Distilled diffusion models generate images in far fewer timesteps but suffer from a critical limitation: reduced sample diversity compared to their base model counterparts.
+Modern text-to-image diffusion models create impressive images but require many computational steps to generate them—sometimes up to 50-100 steps per image. Researchers have developed "distilled" models that work much faster by reducing these steps to just 1-4, making generation nearly instantaneous.
 </p>
 <p>
-In this paper, we introduce two key innovations:
-<ul style="text-align: left;">
-  <li><b>DT-Visualization</b> (Diffusion Target): A novel analysis and debugging technique that reveals what a diffusion model "thinks" the final image will be at any intermediate timestep</li>
-  <li><b>Diversity Distillation</b>: A hybrid inference approach that strategically employs the base model for only the first critical timestep before transitioning to the efficient distilled model</li>
-</ul>
+However, these faster models come with a significant drawback: they tend to create similar-looking images even when using different random seeds. This phenomenon, known as "mode collapse," means distilled models sacrifice creative variety for speed.
 </p>
 <p>
-Our approach not only restores but exceeds the diversity of the original base model while maintaining nearly the computational efficiency of distilled inference. We also demonstrate that control methods like Concept Sliders and LoRAs can be seamlessly transferred between base and distilled models.
+In this research, we explore why this diversity loss happens and introduce two key innovations to solve this problem: DT-Visualization helps us understand what's happening inside diffusion models at each step, and Diversity Distillation combines the best qualities of both slow and fast models to restore creative variety without sacrificing speed.
+</p>
+<p>
+Our approach not only recovers the lost diversity but actually exceeds the variety of the original slow models while maintaining the efficiency of the fast ones. We also demonstrate that control mechanisms trained on one model type can be seamlessly transferred to another, enabling precise creative control across model variations.
 </p>
 </div><!--card-block-->
 </div><!--card-->
@@ -102,86 +101,118 @@ Our approach not only restores but exceeds the diversity of the original base mo
   
 <figure class="center_image" style="margin-top: 30px">
   <center><img src="images/paper/intro.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 1: <b>Diversity Distillation:</b> (a) a base diffusion model is very slow but has good diversity (b) a distilled model is fast but sacrifices diversity (c) we show how the diversity of the base model can be distilled into the fast model by substituting the first timestamp. <b>Control Distillation:</b> (d) Control methods like Concept sliders can be transferred from a base model to distilled models, effectively distilling control.</figcaption>
+  <figcaption>Figure 1: <b>Diversity Distillation:</b> (a) A base diffusion model generates diverse images but requires many computational steps (9.22 seconds). (b) A distilled model is much faster (0.64 seconds) but produces similar-looking images across different seeds. (c) Our method restores diversity while maintaining speed by using the base model for only the crucial first step. <b>Control Distillation:</b> (d) Control methods like Concept Sliders can be transferred between model types, allowing fine-grained creative control in fast models.</figcaption>
 </figure>
 
-<h2>The Problem: Distilled Models Lose Diversity</h2>
+<h2>Understanding the Diversity Loss Problem</h2>
 <p>
-Diffusion models have revolutionized text-to-image generation but require dozens or hundreds of sequential denoising steps, making them computationally expensive. Diffusion distillation techniques address this by modifying model weights to reduce required inference steps.
+Diffusion models work by gradually removing noise from a random starting point, step by step, until a clear image emerges. This process can require dozens or even hundreds of sequential steps, making it computationally expensive. When researchers "distill" these models to work in fewer steps, they essentially compress this denoising process.
 </p>
 <p>
-However, this efficiency comes at a critical cost: <b>mode collapse</b>, where different initial noise seeds produce visually similar outputs, creating a fundamental trade-off between computational efficiency and generation diversity.
+The acceleration comes with a notable cost: the distilled models begin producing images that look very similar to each other, even when starting from different random noise patterns. This lack of variation limits their creative usefulness, as generating multiple options from the same prompt often yields nearly identical results.
+</p>
+<p>
+Think of it like this: the original diffusion model is like an artist who carefully considers many possible interpretations of a concept before settling on a final painting. The distilled model, in contrast, rushes to the same conclusion every time, skipping the creative exploration phase.
 </p>
 
-<h2>Key Insight: Control Capabilities Are Preserved</h2>
+<h2>A Surprising Discovery: Preserved Internal Knowledge</h2>
 <p>
-Our analysis reveals a surprising property: distilled diffusion models maintain consistent concept representations with their base counterparts, despite the distillation procedure. We verify this through concept transfer experiments, where control mechanisms trained on base models can be seamlessly applied to distilled variants and vice versa.
+Our first key finding was unexpected: despite producing less diverse outputs, distilled models still maintain the same internal understanding of concepts as their slower counterparts. We discovered this by testing whether control mechanisms (like sliders that adjust specific image attributes) trained on the slow models would work on the fast ones, and vice versa.
 </p>
-
-<figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 2: Control mechanisms like Concept Sliders, Custom Diffusion, and DreamBooth trained on base models can be transferred to all distilled models without any additional finetuning, demonstrating that concept representations are preserved through the distillation process.</figcaption>
-</figure>
-
-<h2>DT-Visualization: Understanding Diffusion Dynamics</h2>
 <p>
-To understand why diversity collapses during distillation despite preserved concept representations, we introduce <b>DT-Visualization</b> (Diffusion Target), a novel analysis technique that reveals what a diffusion model "thinks" the final image will be at any intermediate timestep.
+The results were clear: controls for adjusting features like "big eyes," "pixel art style," or specific character attributes worked seamlessly across model types without any retraining. This demonstrated that the distilled models hadn't lost their understanding of these concepts—they just weren't expressing the full range of possibilities in their outputs.
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 3: DT-Visualization reveals how models predict final outputs at intermediate steps. This image shows the diffusion target visualization process that extrapolates what the model is planning at each timestep.</figcaption>
+  <center><img src="images/paper/transfer.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 2: Control mechanisms like Concept Sliders, Custom Diffusion, and DreamBooth trained on base models can be directly applied to distilled models without any additional training. This demonstrates that distilled models preserve their understanding of concepts despite producing less diverse outputs.</figcaption>
 </figure>
 
-<h3>DT-Visualization for Debugging</h3>
+<h2>Introducing DT-Visualization: Seeing Inside the Black Box</h2>
 <p>
-DT-Visualization serves as a powerful debugging tool for investigating artifacts and inconsistencies in diffusion model outputs.
+To understand why diversity collapses despite preserved knowledge, we developed a new technique called DT-Visualization (Diffusion Target Visualization). This method reveals what the model "thinks" the final image will look like at any intermediate step in the generation process.
+</p>
+<p>
+Think of it as taking a time machine to the middle of the creation process and asking: "Based on what you've done so far, what do you think the final image will be?" Our technique allows us to see these predictions without waiting for the full generation to complete.
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 4: DT-Visualization reveals generation inconsistencies. When prompted with "Image of dog and cat sitting on sofa," the model initially conceptualizes both animals but later discards one element in the final generation.</figcaption>
+  <center><img src="images/paper/dt.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 3: DT-Visualization lets us see what the model predicts as the final output at each intermediate step. This helps us understand how different models build their images over time and reveals key differences between fast and slow models.</figcaption>
 </figure>
 
-<h3>DT-Visualization for Understanding Mode Collapse</h3>
+<h3>Using DT-Visualization to Debug Generation Issues</h3>
 <p>
-Through DT-Visualization, we discover that the initial diffusion steps disproportionately determine structural composition and diversity, while subsequent steps primarily refine details.
+This visualization technique proves valuable as a debugging tool. For example, when we asked a model to generate "an image of a dog and cat sitting on a sofa," the final image contained only a dog. Using DT-Visualization, we could see that the model had actually started to create a cat face around the middle of the process, but later changed its mind and removed it.
 </p>
-
-<figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 5: Comparison of standard diffusion visualization vs. DT-Visualization. Left: Standard visualization shows subtle differences between base and distilled models. Right: Our technique reveals that distilled models commit to final image structure in the first timestep, while base models gradually refine structure across multiple steps.</figcaption>
-</figure>
-
-<figure class="center_image" style="margin-top: 30px">
-  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 6: Measuring the DreamSim distance between intermediate DT-visualization and final image reveals that distilled models establish structural image composition within the initial diffusion step, whereas base models require approximately 30% of steps to achieve comparable structural definition.</figcaption>
-</figure>
-
-<h2>Diversity Distillation: A Hybrid Approach</h2>
 <p>
-Based on our insights from DT-Visualization, we introduce <b>Diversity Distillation</b>, a hybrid inference approach that strategically employs the base model for only the first critical timestep before transitioning to the distilled model for efficient completion of the generation process.
+This insight helps explain why diffusion models sometimes "forget" to include elements mentioned in the prompt—they begin creating certain features but abandon them during later refinement steps.
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
   <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 7: Visual comparison of generation diversity. Each row shows three different generations (different random seeds) for the same prompt using: (left) base model, (middle) distilled model, and (right) our diversity distillation approach.</figcaption>
+  <figcaption>Figure 4: DT-Visualization reveals how models can change course during generation. Here, when prompted to create "an image of dog and cat sitting on sofa," the model initially included a cat face (visible at timestep T=10) but removed it from the final output.</figcaption>
 </figure>
 
-<h2>Results</h2>
+<h3>The Key to Diversity: Early Generation Steps</h3>
 <p>
-Our experimental results demonstrate that this hybrid approach not only restores the diversity lost during distillation but exceeds the diversity of the original base model while maintaining nearly the computational efficiency of distilled inference.
+When we applied DT-Visualization to compare base and distilled models, we discovered something crucial: the initial diffusion steps disproportionately determine the overall structure and diversity of the image, while later steps mainly refine details.
+</p>
+<p>
+Distilled models appear to commit to a final image structure almost immediately after the first denoising step, while base models explore and develop structural elements across multiple steps. This early commitment explains the lack of diversity—distilled models essentially "make up their mind" too quickly about what the image will be.
 </p>
 
 <figure class="center_image" style="margin-top: 30px">
   <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 8: Quantitative comparison showing FID scores and inference time. Our diversity distillation approach achieves better FID than both the base and distilled models while maintaining similar speed to distilled models.</figcaption>
+  <figcaption>Figure 5: Standard visualizations (left) show minimal differences between model types, but our DT-Visualization technique (right) reveals that distilled models commit to final image structure almost immediately, while base models gradually refine structure across multiple steps.</figcaption>
 </figure>
 
 <figure class="center_image" style="margin-top: 30px">
   <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
-  <figcaption>Figure 9: Hyperparameter analysis of our method, showing the impact of guidance scale, number of timesteps, and computational trade-offs.</figcaption>
+  <figcaption>Figure 6: This graph shows how quickly models decide on their final image structure. Distilled models establish structural composition within the initial step, while base models require approximately 30% of their total steps to reach similar structural definition.</figcaption>
 </figure>
+
+<h2>Our Solution: Diversity Distillation</h2>
+<p>
+Based on our findings, we developed a hybrid approach called "Diversity Distillation." This method uses the base model for just the first critical timestep—where the most important structural decisions are made—and then switches to the faster distilled model for all remaining steps.
+</p>
+<p>
+By letting the slow model handle the crucial creative exploration phase and the fast model handle the detail refinement, we get the best of both worlds: the diversity of base models with nearly the speed of distilled ones.
+</p>
+
+<figure class="center_image" style="margin-top: 30px">
+  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 7: Visual comparison of generation diversity. Each row shows different outputs from the same prompt using different random seeds. The base model (left) produces diverse results but is slow. The distilled model (middle) is fast but produces similar images. Our hybrid approach (right) maintains diversity while keeping the speed advantage.</figcaption>
+</figure>
+
+<h2>Remarkable Results</h2>
+<p>
+Our experiments revealed something unexpected: this hybrid approach not only restores the diversity lost during distillation but actually exceeds the diversity of the original base model. Meanwhile, it maintains nearly the same computational efficiency as fully distilled inference, creating images in just 0.64 seconds compared to the base model's 9.22 seconds.
+</p>
+<p>
+We confirmed these results using both objective metrics like FID scores (which measure how well the generated images match real-world distributions) and by examining sample diversity within the same prompt (how different the outputs look when using different random seeds).
+</p>
+
+<figure class="center_image" style="margin-top: 30px">
+  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 8: Our method achieves better FID scores (lower is better) than both the base and distilled models while maintaining similar speed to distilled models. This means our approach creates both higher quality and more diverse images without sacrificing efficiency.</figcaption>
+</figure>
+
+<figure class="center_image" style="margin-top: 30px">
+  <center><img src="images/paper/method.png" style="width:100%; max-width:800px"></center>
+  <figcaption>Figure 9: We examined various parameters to optimize our method, including guidance scale, number of timesteps, and computational trade-offs. Even using the base model for just the first step provides substantial diversity benefits.</figcaption>
+</figure>
+
+<h2>Practical Implications</h2>
+<p>
+This research challenges the traditional assumption that there must be a trade-off between speed and diversity in diffusion models. By understanding exactly where in the process diversity is determined, we can design hybrid approaches that maintain creative variety without sacrificing computational efficiency.
+</p>
+<p>
+For practitioners, our findings mean that existing investments in control mechanisms like Concept Sliders, LoRAs, and custom fine-tunings can be seamlessly transferred between model types. This "control distillation" enables precise creative direction even in the fastest models.
+</p>
+<p>
+Our DT-Visualization technique also provides a valuable new tool for researchers and developers to debug and understand diffusion models, potentially leading to further innovations in model architecture and training.
+</p>
 
 <h2>How to cite</h2>
 
